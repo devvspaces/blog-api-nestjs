@@ -1,0 +1,119 @@
+enum users.role {
+  admin
+  barber
+  user
+}
+
+enum users.mode {
+  phone
+  google
+  facebook
+  apple
+}
+
+enum orders.status {
+  pending
+  approved
+  completed
+  rejected
+  cancelled
+}
+
+Table users {
+  id integer [primary key]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+  image varchar
+  email varchar
+  country_code varchar
+  phone_no varchar
+  first_name varchar
+  last_name varchar
+  password varchar [note: "Hashed password default to dni if not set"]
+  role users.role
+  location varchar
+  device_id varchar
+  mode_of_signup users.mode
+}
+
+Table saved_places {
+  id integer [primary key]
+  location varchar
+  user_id varchar
+}
+
+Table barbers {
+  id integer [primary key]
+  user_id integer
+  regular_hours varchar [note: "json object"]
+}
+
+Table barber_portfolios {
+  id integer [primary key]
+  barber_id integer
+  image varchar
+}
+
+Table user_favorites {
+  id integer [primary key]
+  user_id integer
+  barber_id integer
+}
+
+Table barber_services {
+  id integer [primary key]
+  barber_id integer
+  name varchar
+  description varchar
+  price integer
+  time integer [note: "Amount of service time in minutes"]
+}
+
+Table order {
+  id integer [primary key]
+  service_id integer
+  created_at datetime
+  status orders.status
+  paid bool
+  appointment_date datetime
+  completed_date datetime
+}
+
+Table barber_reviews {
+  id integer [primary key]
+  order_id integer
+  created_at datetime
+  rating integer
+  comment varchar
+}
+
+Table barber_cards {
+  id integer [primary key]
+  barber_id integer
+  card_number varchar
+  country varchar
+}
+
+Table barber_withdrawals {
+  id integer [primary key]
+}
+
+
+
+
+
+Ref: "public"."barbers"."id" - "public"."users"."id"
+
+Ref: "public"."barbers"."id" < "public"."barber_services"."barber_id"
+
+Ref: "public"."user_favorites"."user_id" <> "public"."users"."id"
+
+Ref: "public"."user_favorites"."barber_id" <> "public"."barbers"."id"
+
+Ref: "public"."order"."service_id" > "public"."barber_services"."id"
+
+Ref: "public"."barber_portfolios"."barber_id" > "public"."barbers"."id"
+Ref: "public"."barber_cards"."barber_id" > "public"."barbers"."id"
+Ref: "public"."saved_places"."user_id" > "public"."users"."id"
+
+Ref: "public"."barber_reviews"."order_id" - "public"."order"."id"

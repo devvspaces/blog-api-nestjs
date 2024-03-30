@@ -1,0 +1,28 @@
+name: Node.js CI (Dev)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Deploy to AWS Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_INSTANCE_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            export PATH=/home/ubuntu/.nvm/versions/node/v20.11.1/bin:$PATH
+            cd Ewa-Backend
+            git pull
+            yarn install
+            yarn run build
+            pm2 restart all
